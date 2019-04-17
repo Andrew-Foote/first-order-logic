@@ -1,0 +1,62 @@
+-- This file has been generated from package.yaml by hpack version 0.28.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 282c3ef5a07d55c90803028a44ae220f4038cb20b5a575a3779e621a805c63c8
+
+name:           logik
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/logik#readme>
+homepage:       https://github.com/githubuser/logik#readme
+bug-reports:    https://github.com/githubuser/logik/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2019 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/logik
+
+library
+  exposed-modules:
+      Logic
+      SolSet
+  other-modules:
+      Paths_logik
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
+
+executable logik-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_logik
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , logik
+  default-language: Haskell2010
+
+test-suite logik-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_logik
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , logik
+  default-language: Haskell2010

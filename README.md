@@ -1,1 +1,1 @@
-# first-order-logic
+# logik
