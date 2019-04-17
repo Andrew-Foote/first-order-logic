@@ -14,36 +14,9 @@ data Formula = Var :< Var -- ^ A membership relation.
     deriving (Eq, Show)
 infixr 8 :->
 
--- | Attempt to apply detachment to two formulas.
-detach :: Formula -- ^ The major premise (expected to be of the form @p :-> q@)
-       -> Formula -- ^ The minor premise (expected to be of the form @p@)
-       -> Maybe Formula -- A 'Maybe' containing the conclusion if the inference
-                        -- is valid
-detach (p :-> q) r | p == r = Just q
-                   | otherwise = Nothing
-detach _ _ = Nothing
-
--- | Test whether a formula is an instance of axiom K.
-axiomK :: Formula -> Bool
-axiomK (p :-> q :-> r) = p == r
-axiomK _ = False
-
--- | Test whether a formula is an instance of axiom S.
-axiomS :: Formula -> Bool
-axiomS ((p :-> q :-> r) :-> (s :-> t) :-> u :-> v) = p == s && p == u &&
-                                                     q == t && r == v
-axiomS _ = False
-
--- | Test whether a formula is an instance of axiom N.
-axiomN :: Formula -> Bool
-axiomN (((p :-> Bottom) :-> Bottom) :-> q) = p == q
-axiomN _ = False
-
--- | Test whether a formula is an instance of axiom U.
-axiomU :: Formula -> Bool
-axiomU (Forall x (p :-> q) :-> Forall y r :-> Forall z s) = x == y && x == z &&
-                                                            p == r && q == s
-axiomU _ = False
+-- | Negate a formula.
+neg :: Formula -> Formula
+neg p = p :-> Bottom
 
 -- | Substitute one variable in place of another within a formula.
 subst :: Var -- ^ The variable to be replaced
@@ -85,11 +58,7 @@ solveSubst x (p :-> q) _ = NoSol
 solveSubst x (Forall a p) (Forall b q) | x == a && x == b = IndetSol
                                        | a == b = solveSubst x p q 
                                        | otherwise = NoSol
-
--- | Test whether a formula is an instance of axiom I.
-axiomI :: Formula -> Bool
-axiomI (Forall x p :-> q) = solvable $ solveSubst x p q
-axiomI _ = False
+solveSubst x (Forall a p) _ = NoSol
 
 -- | Test whether a variable is free in a formula.
 free :: Var -> Formula -> Bool
@@ -104,14 +73,50 @@ free x (Forall a p) = x /= a && free x p
 bound :: Var -> Formula -> Bool 
 bound x p = not (free x p)
 
--- | Test whether a formula is an instance of axiom G.
-axiomG :: Formula -> Bool
-axiomG (p :-> Forall x q) = p == q && bound x p
-axiomG _ = False
-
--- | Return a variable which is not free in the given formula.
+-- | Return a variable which is bound in the given formula.
 freshVar :: Formula -> Var
 freshVar (Var m :< Var n) = Var (max m n + 1)
 freshVar Bottom = Var 0
 freshVar (p :-> q) = max (freshVar p) (freshVar q)
 freshVar (Forall x p) = freshVar p
+
+-- | Attempt to apply detachment to two formulas.
+detach :: Formula -- ^ The major premise (expected to be of the form @p :-> q@)
+       -> Formula -- ^ The minor premise (expected to be of the form @p@)
+       -> Maybe Formula -- A 'Maybe' containing the conclusion if the inference
+                        -- is valid
+detach (p :-> q) r | p == r = Just q
+                   | otherwise = Nothing
+detach _ _ = Nothing
+
+-- | Test whether a formula is an instance of axiom K.
+axiomK :: Formula -> Bool
+axiomK (p :-> q :-> r) = p == r
+axiomK _ = False
+
+-- | Test whether a formula is an instance of axiom S.
+axiomS :: Formula -> Bool
+axiomS ((p :-> q :-> r) :-> (s :-> t) :-> u :-> v) = p == s && p == u &&
+                                                     q == t && r == v
+axiomS _ = False
+
+-- | Test whether a formula is an instance of axiom N.
+axiomN :: Formula -> Bool
+axiomN (((p :-> Bottom) :-> Bottom) :-> q) = p == q
+axiomN _ = False
+
+-- | Test whether a formula is an instance of axiom U.
+axiomU :: Formula -> Bool
+axiomU (Forall x (p :-> q) :-> Forall y r :-> Forall z s) = x == y && x == z &&
+                                                            p == r && q == s
+axiomU _ = False
+
+-- | Test whether a formula is an instance of axiom I.
+axiomI :: Formula -> Bool
+axiomI (Forall x p :-> q) = solvable $ solveSubst x p q
+axiomI _ = False
+
+-- | Test whether a formula is an instance of axiom G.
+axiomG :: Formula -> Bool
+axiomG (p :-> Forall x q) = p == q && bound x p
+axiomG _ = False
